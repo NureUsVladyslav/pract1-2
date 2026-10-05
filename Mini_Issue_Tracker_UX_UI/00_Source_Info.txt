@@ -1,0 +1,6 @@
+Проєкт: Mini Issue Tracker — UX/UI макет
+Вихідна специфікація: SD_Spec.docx
+Дата отримання специфікації: 04.10.2026
+Автори навчальної роботи: Ус Владислав, Козир Дмитро, Мамішев Ельмір, Дроздов Антон (UX_UI_Group_01)
+Версія макета: Wireframes_v2
+Figma: https://www.figma.com/design/xZFrvueFxwNka1sD6QHddJ/Untitled?node-id=5-109&t=kU2HiA41287m6kXU-1 

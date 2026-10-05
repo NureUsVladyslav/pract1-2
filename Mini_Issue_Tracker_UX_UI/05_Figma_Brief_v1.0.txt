@@ -1,0 +1,323 @@
+﻿Figma Design Implementation Brief: Mini Issue Tracker (Release MVP v1.0)
+1. Purpose and Scope
+* Purpose: Provide a complete, self-contained implementation specification for the low-fidelity UI layout and interactive prototype of the internal Mini Issue Tracker web application.
+* * Actors (Primary Users):
+* 
+   * Team Member
+   * 
+   *    * Team Lead
+   * 
+   *       * Scope Boundary (Release MVP): Covers core issue lifecycle management comprising stories US-01 through US-08.
+      * 
+         * Included User Stories: US-01 (Create Issue), US-02 (View Issues), US-03 (Assign Issue), US-04 (Set Issue Priority), US-05 (Track Progress), US-06 (Add Comment), US-07 (Update Status), US-08 (View Important Issues).
+         * 2. Design Constraints & Canvas Guidelines
+         * Visual Fidelity: Desktop, grayscale, low-fidelity wireframe.
+         *          * Figma Structure & Execution Guidelines:
+         * 
+            * Editable Native Layers: Use native Figma shapes, text elements, and auto-layout frames.
+            *             * Component Reuse: Build layout using local reusable components (e.g., buttons, drop-down controls, issue list rows, badge indicators).
+            *             * Auto Layout: Apply Auto Layout across all content containers, modal popups, and table structures.
+            *             * Naming Conventions: Use clear, semantic layer and frame names matching the canonical Screen/State IDs (e.g., S-02-A / Issues List - All).
+            *             * Page Setup: All canonical frames and component state examples must reside on a single working page.
+            *             * Annotations: Place visual callouts, notes, and transition annotations outside product frames.
+            *             * Forbidden Canvas Elements: Do NOT add generic page icon placeholders, decorative filler shapes, table row selection checkboxes, or bulk action controls.
+            * 3. Canonical Screens and States (Exact IDs)
+The prototype layout requires 4 physical Figma frames to represent all system surfaces and states:
+
+
+            1. S-01 — Authentication Boundary Placeholder Frame
+            2. 
+               * Purpose: Formally represents the authentication boundary without requiring a login or SSO interface.
+               *                * Entry Condition: Application load.
+               *                3. S-02 — Issues List Frame (Contains 3 content/tab states):
+               4. 
+                  * S-02-A (Tab: All): Primary repository view rendering all issues.
+                  *                   * S-02-B (Tab: Important): Filtered view rendering important unresolved issues.
+                  *                   * S-02-C (Empty State): Default view rendered when no issues exist.
+                  *                   5. M-01 — Create Issue Modal Frame
+                  6. 
+                     * Purpose: Overlay modal dialog for registering a new issue.
+                     *                      7. S-03 — Issue Details Frame
+                     8. 
+                        * Purpose: Integrated view displaying complete issue information, field controls, and discussion comments.
+                        * 4. Required Labels, Data Attributes & Initial Values
+4.1 Create Issue Modal (M-01)
+                        * User Input Fields (Only 2 User Input Fields Allowed):
+                        * 
+                           * Title (Text Input, Required)
+                           *                            * Description (Text Area, Required)
+                           *                            * System Auto-Assigned Attributes (Hidden/Non-editable during creation):
+                           * 
+                              * ID  Auto-generated unique identifier
+                              *                               * Status  Set to Open
+                              * 
+                              *                               * Priority  Set to Not Set
+                              * 
+                              *                               * Assignee  Set to Unassigned
+                              * 
+                              *                               * Author  Set to Current Authenticated User
+                              *                               * Created_at  Set to Current Timestamp
+                              * 4.2 Display Formats (S-02 & S-03)
+                                 * Priority Representation:
+                                 * 
+                                    * Unset priority MUST be rendered as explicit text "Not Set".
+                                    *                                     * Assigned priority values: Low, Normal, High, Critical.
+                                    *                                     * Assignee Representation:
+                                    * 
+                                       * Unassigned responsibility MUST be rendered as explicit text "Unassigned".
+                                       *                                        * Assigned responsibility: Team Member Name.
+                                       * 5. Controls, Permissions & Interaction Patterns
+5.1 Contextual Permission Matrix
+Permissions depend on the actor's system role (Team Lead vs Team Member) and contextual relation to the specific issue (Assignee vs Non-Assignee):
+
+
+Action
+	Team Member (Non-Assignee)
+	Team Member (Assignee)
+	Team Lead (Non-Assignee)
+	Team Lead (Assignee)
+	Source / D-ID
+	View Issues & Details
+	Allowed
+	Allowed
+	Allowed
+	Allowed
+	SR-02, BR-01
+
+
+	Create Issue
+	Allowed
+	Allowed
+	Allowed
+	Allowed
+	BR-02
+
+
+	Add Comment
+	Allowed
+	Allowed
+	Allowed
+	Allowed
+	SR-06, AC-06.1
+
+
+	Assign / Reassign Issue
+	Disabled
+	Disabled
+	Allowed
+	Allowed
+	US-03, D-04, D-05
+
+
+	Set / Change Priority
+	Disabled
+	Disabled
+	Allowed
+	Allowed
+	BR-06, AC-04.2, D-03, D-05
+
+
+	Update Status
+	Disabled
+	Allowed
+	Disabled
+	Allowed
+	BR-08, AC-07.4, D-05
+
+
+	Rule: Team Lead does NOT automatically receive permission to update issue status unless explicitly assigned as the issue's Assignee.
+
+
+5.2 Control Representation & Execution
+                                       * Disabled Control Rule: Controls forbidden for a given user role or context MUST be rendered in a visually disabled state, NOT hidden.
+                                       *                                        * Attribute Update Pattern: Attribute changes for Assignee, Priority, and Status use a "Select Dropdown + Apply Button" control pair.
+                                       * 
+                                          * C-03.2 / C-03.3: Assignee Dropdown + Apply Assignee Button
+                                          *                                           * C-03.4 / C-03.5: Priority Dropdown + Apply Priority Button
+                                          *                                           * C-03.6 / C-03.7: Status Dropdown + Apply Status Button
+                                          *                                           * Save Location: Successful attribute updates keep the user on the S-03 Issue Details view.
+                                          * 6. Status Transitions Matrix
+Status set values: Open, In Progress, Resolved, Closed. Initial status: Open. Closed is a terminal state with no outgoing transitions.
+
+
+From Status
+	To Status
+	Executed By
+	Transition Allowed?
+	Rule / Source
+	Open
+	In Progress
+	Assignee Only
+	Yes
+	BR-08.1, AC-07.2
+
+
+	Open
+	Resolved or Closed
+	Any User
+	No (Disabled)
+	BR-08.1
+
+
+	In Progress
+	Resolved
+	Assignee Only
+	Yes
+	BR-08.1, AC-07.2
+
+
+	In Progress
+	Open or Closed
+	Any User
+	No (Disabled)
+	BR-08.1
+
+
+	Resolved
+	Closed
+	Assignee Only
+	Yes
+	BR-08.1, AC-07.2
+
+
+	Resolved
+	In Progress
+	Assignee Only (Re-open)
+	Yes
+	BR-08.1, AC-07.2
+
+
+	Resolved
+	Open
+	Any User
+	No (Disabled)
+	BR-08.1
+
+
+	Closed
+	Open, In Progress, or Resolved
+	Any User
+	No (Terminal State)
+	BR-08.1
+
+
+	7. Important Issues Filtering Predicate Logic
+An issue  is rendered on the S-02-B (Important) tab if and only if it satisfies the predicate:
+
+
+
+
+
+(Source: BR-09, BR-09.1, AC-08.1–AC-08.4)
+
+
+
+
+Predicate Edge Cases:
+                                          * Priority = High, Status = Resolved  INCLUDED (Resolved issues remain active until Closed).
+                                          *                                           * Priority = Critical, Status = Closed  EXCLUDED (All Closed issues are excluded).
+                                          *                                           * Priority = Not Set, Status = Open  EXCLUDED (Priority must be High or Critical).
+                                          * 8. Required Empty and Error States
+                                             1. Global Empty List (S-02-C):
+                                             2. 
+                                                * Triggered when zero issues exist in the repository.
+                                                *                                                 * Display text: "No issues reported yet."
+                                                * 
+                                                *                                                    3. Important Tab Empty List (S-02-B):
+                                                   4. 
+                                                      * Triggered when no issues match the Important predicate.
+                                                      *                                                       * Display text: "No important issues found."
+                                                      * 
+                                                      *                                                          5. Modal Form Validation Errors (M-01):
+                                                         6. 
+                                                            * Triggered when clicking Create (C-01.Btn1) with empty input fields.
+                                                            *                                                             * Title error text: "Title is required"
+                                                            * 
+                                                            *                                                             * Description error text: "Description is required"
+                                                            * 
+                                                            *                                                                7. Empty Comment Text Error (S-03):
+                                                               8. 
+                                                                  * Triggered when clicking Add Comment (C-03.9) with an empty text area.
+                                                                  *                                                                   * Display inline error text: "Comment text cannot be empty".
+                                                                  *                                                                   9. Comment Save System Failure (S-03):
+                                                                  10. 
+                                                                     * Triggered upon simulated backend save error.
+                                                                     *                                                                      * Display banner/notification: "Failed to save comment. Please try again." (No comment entry added).
+                                                                     * 9. Navigation Intent & Transitions (T-IDs)
+                                                                     * T-01 (App Entry): S-01  S-02-A (Click Enter Application C-01.1).
+                                                                     *                                                                      * T-02 (Tab Switch): S-02-A  S-02-B (Click Important Tab C-02.2).
+                                                                     *                                                                      * T-03 (Tab Switch): S-02-B  S-02-A (Click All Tab C-02.1).
+                                                                     *                                                                      * T-04 (Open Modal): S-02  M-01 (Click + Create Issue C-02.3).
+                                                                     *                                                                      * T-05 (Cancel Modal): M-01  S-02 (Click Cancel C-01.Btn2, returns to active tab without saving).
+                                                                     *                                                                      * T-06 (Submit Modal): M-01  S-03 (Click Create C-01.Btn1, creates issue and opens details).
+                                                                     *                                                                      * T-07 (View Details): S-02  S-03 (Click Issue Row C-02.4).
+                                                                     *                                                                      * T-08..T-12 (Details Self-Transitions): S-03  S-03 (Attribute updates & comment submissions).
+                                                                     *                                                                      * T-13 (Back from Details): S-03  S-02-A (Click Back to List C-03.1 when opened from All tab).
+                                                                     *                                                                      * T-14 (Back from Details preserving tab): S-03  S-02-B (Click Back to List C-03.1 when opened from Important tab).
+                                                                     * 10. Sample Dummy Data Set
+                                                                        * User 1 (Team Member): Alice Smith
+                                                                        *                                                                         * User 2 (Team Member): Bob Jones
+                                                                        *                                                                         * User 3 (Team Lead): Carol Danvers
+                                                                        *                                                                         * Issue #101: Title: "Authentication failure on login", Status: In Progress, Priority: High, Assignee: Alice Smith, Author: Bob Jones.
+                                                                        *                                                                         * Issue #102: Title: "UI alignment glitch on dashboard", Status: Open, Priority: Not Set, Assignee: Unassigned, Author: Alice Smith.
+                                                                        *                                                                         * Issue #103: Title: "Database connection timeout", Status: Resolved, Priority: Critical, Assignee: Bob Jones, Author: Carol Danvers.
+                                                                        * 11. Explicit Scope Exclusions (Forbidden Controls)
+The following controls and features MUST NOT be added to any screen or frame:
+
+
+                                                                        1. No Attachments Control: Drag-and-drop file upload zones or attachment controls (US-09 is Deferred).
+                                                                        2.                                                                         3. No Issue Deletion Control: Delete buttons or confirmation modals (BR-10 forbids deletion).
+                                                                        4.                                                                         5. No Separate Management Pages: Dedicated Assignee, Priority, or Status transition screens (all handled via S-03 controls).
+                                                                        6.                                                                         7. No Title/Description Editing: Editable inputs for Title or Description on S-03 after creation.
+                                                                        8.                                                                         9. No Change History / Audit Log: Change log lists or audit widgets (BR-11).
+                                                                        10.                                                                         11. No Priority Reset: "Reset" or "Clear" options to return Priority to Not Set.
+                                                                        12. 12. Component State Examples Reference Matrix
+To avoid creating redundant full-page frames, provide compact component state variants on the canvas covering all 4 status values and all 4 role/assignee contexts:
+
+
+Context / Role State Variant
+	Status Dropdown (C-03.6) State
+	Assignee Dropdown (C-03.2) State
+	Priority Dropdown (C-03.4) State
+	Context 1: Team Member (Non-Assignee)
+	Disabled
+	Disabled
+	Disabled
+
+
+
+
+	Context 2: Team Member (Assignee)
+	Enabled (Options per Status Matrix)
+	Disabled
+	Disabled
+
+
+
+
+	Context 3: Team Lead (Non-Assignee)
+	Disabled
+	Enabled
+	Enabled
+
+
+
+
+	Context 4: Team Lead (Assignee)
+	Enabled (Options per Status Matrix)
+	Enabled
+	Enabled
+
+
+
+
+	13. Figma Implementation Acceptance Checklist
+                                                                        * [ ] 4 canonical product screens created (S-02 may use additional frames to demonstrate All/Important/Empty states) S-01, S-02, M-01, S-03.
+                                                                        *                                                                         * [ ] All elements created using native, editable Figma layers with Auto Layout.
+                                                                        *                                                                         * [ ] Single working page layout with grayscale low-fidelity styling.
+                                                                        *                                                                         * [ ] Disabled states applied to controls forbidden for specific roles/contexts.
+                                                                        *                                                                         * [ ] Attribute update pattern implemented as Dropdown + Apply button.
+                                                                        *                                                                         * [ ] Modal M-01 contains ONLY Title and Description inputs.
+                                                                        *                                                                         * [ ] S-02-B filters strictly by High/Critical Priority AND non-Closed status.
+                                                                        *                                                                         * [ ] Returning from S-03 preserves the previously active list tab (T-13/T-14).
+                                                                        *                                                                         * [ ] All excluded controls (Delete, Attachments, History, Reset) are completely absent.
